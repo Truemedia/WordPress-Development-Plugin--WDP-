@@ -1,6 +1,6 @@
 <?php
 /**
- * @package Web_Des_Features
+ * @package WordPress_Development_Plugin
  * @version 1.0
  */
 /*
@@ -11,7 +11,39 @@ Author: Wade Penistone
 Version: 1.0
 Author URI: http://mediacityonline.net
 */
-// [shortdebug var_pageurl="wordpress function" var_user="wordpress function"]
+
+// INCLUDES of this initial plugin file
+/* include WP_CONTENT_DIR."/plugins/wordpress_wdp/plugin.php"; */
+/* include WP_CONTENT_DIR."/plugins/wordpress_wdp/theme.php"; */
+
+// ACTIONS/CONTROLLERS
+add_action('wp_dashboard_setup', 'demo_add_dashboard_widgets' ); /* Setup everything needed to view the widget correctly */
+// admin -> menu
+/* add_utility_page('Add a plugin', 'a custom title', 'administrator', 'add-plugin', 'development_view'); */
+add_shortcode( 'shortdebug', 'shortdebug_func' );
+
+// VIEWS/HTML templates this plugin displays
+function plugin_development_dashboard_view(){ /* Dashboard widget HTML inside container */
+	return "my widget text to see plugin stuff wuz here 011";
+}
+function theme_development_dashboard_view(){ /* Dashboard widget HTML inside container */
+	return "my widget for editing themes and theme stuff";
+}
+
+// MODELS the pure logical parts of the plugin
+/* prepares logic and pairs it with html output for plugin dev dashboard widget */
+function demo_dashboard_widget_function() {
+
+/* view for plugin dev dash widget */
+echo(plugin_development_dashboard_view());
+}
+/* prepares logic and pairs it with html output for theme dev dashboard widget */
+function demo_dashboard_theme_widget_function() {
+
+/* view for theme dev dash widget */
+echo(plugin_development_dashboard_view());
+}
+// [shortcode var_pageurl="wordpress function" var_user="wordpress function"]
 function shortdebug_func( $atts ) {
 	extract( shortcode_atts( array(
 		'var_pageurl' => 'something',
@@ -20,5 +52,28 @@ function shortdebug_func( $atts ) {
 
 	return "var_pageurl = {$var_pageurl}, var_user = {$var_user}";
 }
-add_shortcode( 'shortdebug', 'shortdebug_func' );
+
+// INSTALLERS
+// install a dashboard item
+function demo_add_dashboard_widgets() {
+wp_add_dashboard_widget('demo_dashboard_widget', 'WordPress create a plugin', 'demo_dashboard_widget_function');
+
+// Globalize the metaboxes array, this holds all the widgets for wp-admin
+global $wp_meta_boxes;
+
+// Get the regular dashboard widgets array
+// (which has our new widget already but at the end)
+$normal_dashboard = $wp_meta_boxes['dashboard']['normal']['core'];
+
+// Backup and delete our new dashbaord widget from the end of the array
+$demo_widget_backup = array('demo_dashboard_widget' =>
+$normal_dashboard['demo_dashboard_widget']);
+unset($normal_dashboard['demo_dashboard_widget']);
+
+// Merge the two arrays together so our widget is at the beginning
+$sorted_dashboard = array_merge($demo_widget_backup, $normal_dashboard);
+
+// Save the sorted array back into the original metaboxes
+$wp_meta_boxes['dashboard']['normal']['core'] = $sorted_dashboard;
+}
 ?>
